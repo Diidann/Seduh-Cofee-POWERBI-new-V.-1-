@@ -1,0 +1,51 @@
+product_id,product_name,category,base_price,unit_cost,launch_date
+PRD-001,Arabika Gayo Aceh 200g,Roasted Beans,115000,48500,2023-10-17
+PRD-002,Arabika Toraja Sapan 200g,Roasted Beans,125000,54000,2022-04-25
+PRD-003,Arabika Kintamani Bali 200g,Roasted Beans,118000,49500,2022-01-26
+PRD-004,Arabika Java Preanger 200g,Roasted Beans,110000,45000,2024-01-30
+PRD-005,Arabika Flores Bajawa 200g,Roasted Beans,122000,52500,2022-10-09
+PRD-006,Robusta Lampung 250g,Roasted Beans,78000,31000,2022-09-08
+PRD-007,House Blend 200g,Roasted Beans,89000,35500,2022-08-17
+PRD-008,House Blend 500g,Roasted Beans,195000,76000,2022-05-23
+PRD-009,House Blend 1kg,Roasted Beans,349000,132500,2024-01-25
+PRD-010,Espresso Blend 250g,Roasted Beans,99000,39500,2022-04-15
+PRD-011,Decaf Blend 200g,Roasted Beans,135000,61000,2023-11-24
+PRD-012,Single Origin Sampler 4x100g,Roasted Beans,165000,72500,2024-01-29
+PRD-013,Manuk Gading Natural 200g,Roasted Beans,145000,66500,2023-07-13
+PRD-014,Cold Brew Blend 500g,Roasted Beans,178000,71000,2022-03-31
+PRD-015,Cold Brew Original 250ml,Ready-to-Drink,32000,16500,2023-08-28
+PRD-016,Cold Brew Latte 250ml,Ready-to-Drink,38000,21000,2023-03-09
+PRD-017,Es Kopi Susu Gula Aren 250ml,Ready-to-Drink,28000,14000,2022-02-02
+PRD-018,Americano Can 200ml,Ready-to-Drink,25000,12000,2022-01-31
+PRD-019,Latte Can 200ml,Ready-to-Drink,30000,15500,2022-04-06
+PRD-020,RTD Variety Pack 6x250ml,Ready-to-Drink,165000,87500,2022-08-12
+PRD-021,Nitro Cold Brew 250ml,Ready-to-Drink,42000,23000,2022-08-27
+PRD-022,V60 Dripper Ceramic,Brewing Equipment,145000,90000,2023-06-02
+PRD-023,French Press 600ml,Brewing Equipment,235000,150500,2023-09-09
+PRD-024,Aeropress Coffee Maker,Brewing Equipment,425000,289000,2022-01-28
+PRD-025,Moka Pot 3-cup,Brewing Equipment,285000,185000,2023-07-29
+PRD-026,Manual Hand Grinder,Brewing Equipment,389000,256500,2022-07-23
+PRD-027,Gooseneck Kettle 1L,Brewing Equipment,315000,201500,2024-01-04
+PRD-028,Digital Coffee Scale,Brewing Equipment,275000,173000,2023-10-28
+PRD-029,Espresso Tamper 51mm,Brewing Equipment,165000,99000,2023-12-20
+PRD-030,Electric Burr Grinder,Brewing Equipment,950000,665000,2023-07-13
+PRD-031,Chemex 6-cup,Brewing Equipment,520000,348500,2023-03-06
+PRD-032,Paper Filter V60 (100pcs),Accessories,45000,25000,2022-08-14
+PRD-033,Reusable Ceramic Cup 240ml,Accessories,89000,51500,2023-04-05
+PRD-034,Cleaning Brush Set,Accessories,35000,17500,2023-08-27
+PRD-035,Airtight Bean Canister 500g,Accessories,125000,71000,2022-10-12
+PRD-036,Milk Frother Handheld,Accessories,95000,57000,2024-04-08
+PRD-037,Coffee Knock Box,Accessories,145000,84000,2024-06-09
+PRD-038,Insulated Tumbler 400ml,Accessories,135000,75500,2022-01-07
+PRD-039,Filter Paper Chemex (100pcs),Accessories,65000,36000,2024-02-17
+PRD-040,Beans Subscription Monthly 250g,Subscription,149000,62500,2024-04-05
+PRD-041,Beans Subscription Monthly 500g,Subscription,259000,106000,2022-06-13
+PRD-042,Bi-Weekly Fresh Roast Plan,Subscription,289000,121500,2023-12-16
+PRD-043,Office Coffee Plan 1kg/mo,Subscription,339000,135500,2023-03-09
+PRD-044,RTD Weekly Delivery Plan,Subscription,219000,114000,2022-12-15
+PRD-045,Starter Brewing Kit,Gift Set,385000,223500,2022-10-12
+PRD-046,Nusantara Sampler Gift Box,Gift Set,295000,147500,2022-06-09
+PRD-047,Premium Coffee Hamper,Gift Set,675000,371500,2022-08-09
+PRD-048,Cold Brew Gift Bundle,Gift Set,245000,130000,2024-02-21
+PRD-049,V60 Enthusiast Gift Set,Gift Set,525000,315000,2022-12-11
+PRD-050,Corporate Gift Box (10pax),Gift Set,1250000,700000,2022-04-15

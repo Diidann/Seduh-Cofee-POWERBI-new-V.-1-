@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seduh Coffee Dashboard</title>
+<meta name="description" content="Dashboard interaktif Seduh Coffee: revenue, profit, produk, diskon, segmen pelanggan, dan efisiensi marketing.">
+<meta name="theme-color" content="#4B2E1E">
+<style>
+:root{--bg:#F6F2EE;--card:#fff;--brown:#4B2E1E;--mid:#B07A4F;--light:#E2C3A3;--ink:#333;--muted:#777;--line:#E7E0D9;--green:#2E7D5B;--red:#C0392B}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:13px}
+.wrap{max-width:1320px;margin:0 auto;padding:12px 24px 28px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+h1{margin:0;font-size:22px;font-weight:700;color:var(--brown);letter-spacing:-.2px}
+h1 span{font-size:15px;font-weight:400;color:var(--muted);margin-left:6px}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+nav button{border:1px solid var(--brown);background:#fff;color:var(--brown);padding:7px 14px;font:inherit;cursor:pointer;border-radius:2px}
+nav button.on{background:var(--brown);color:#fff}
+.slicers{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:10px}
+.slc{background:var(--card);border-radius:4px;padding:6px 10px 8px;position:relative}
+.slc label{display:block;font-weight:600;font-size:12px;color:var(--brown);margin-bottom:4px}
+.slc .btn{width:100%;text-align:left;border:1px solid #CFC7BF;background:#fff;padding:5px 8px;font:inherit;cursor:pointer;display:flex;justify-content:space-between;border-radius:2px}
+.slc .btn:after{content:"\25BE";color:var(--muted)}
+.slc .pnl{display:none;position:absolute;left:10px;right:10px;top:62px;z-index:30;background:#fff;border:1px solid #CFC7BF;max-height:260px;overflow:auto;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.slc.open .pnl{display:block}
+.pnl div{padding:5px 10px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.pnl div:hover{background:#F6F2EE}
+.pnl i{width:13px;height:13px;border:1px solid #999;display:inline-block;flex:none}
+.pnl div.sel i{background:var(--brown);border-color:var(--brown);box-shadow:inset 0 0 0 2px #fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:-2px 0 10px;min-height:0}
+.chip{background:#fff;border:1px solid var(--light);color:var(--brown);border-radius:12px;padding:2px 4px 2px 10px;font-size:12px;display:inline-flex;gap:4px;align-items:center}
+.chip b{cursor:pointer;width:18px;height:18px;line-height:17px;text-align:center;border-radius:9px;color:var(--muted)}
+.chip b:hover{background:var(--light);color:var(--brown)}
+.reset{border:0;background:transparent;color:var(--mid);cursor:pointer;font:inherit;text-decoration:underline}
+.kpis{display:grid;gap:12px;margin-bottom:12px}
+.kpi{background:var(--card);border-radius:4px;padding:12px 8px;text-align:center}
+.kpi .v{font-size:23px;color:var(--brown);font-weight:500;white-space:nowrap}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:3px}
+.grid{display:grid;gap:12px;margin-bottom:12px;grid-template-rows:minmax(0,1fr)}
+.card{background:var(--card);border-radius:4px;padding:10px 12px;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.card h3{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--brown)}
+.cv{position:relative;flex:1;min-height:0}
+.scroll{overflow-y:auto;flex:1;min-height:0}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th{color:var(--brown);font-weight:600;text-align:right;padding:4px 6px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+td{text-align:right;padding:4px 6px;border-bottom:1px solid #F1ECE7}
+th:first-child,td:first-child{text-align:left}
+tr.row{cursor:pointer}tr.row:hover td{background:#FAF6F2}
+tr.row.on td{background:#F3E9DF}
+tr.dim td{opacity:.45}
+tfoot td{font-weight:700;border-top:1px solid var(--line);border-bottom:0;position:sticky;bottom:0;background:#fff}
+.foot{color:var(--muted);font-size:11.5px;margin-top:6px}
+#msg{padding:60px;text-align:center;color:var(--muted)}
+@media(max-width:980px){.grid{height:auto!important;grid-template-rows:none}.slicers{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:repeat(2,1fr)!important}.grid{grid-template-columns:1fr!important}.card{height:300px}.card.tall{height:520px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Seduh Coffee<span id="sub">Business Monitor</span></h1>
+    <nav id="nav"></nav>
+  </header>
+  <div class="slicers" id="slicers"></div>
+  <div class="chips" id="chips"></div>
+  <div class="kpis" id="kpis"></div>
+  <div id="page"><div id="msg">Memuat data…</div></div>
+  <div class="foot">Sumber data: sama dengan dashboard Power BI (orders, customers, products, marketing_spend). Revenue dan profit hanya dari order berstatus Completed; profit = COGS saja. Klik batang, irisan, atau baris tabel untuk memfilter; klik lagi untuk melepas.</div>
+</div>
+<script>/*__CHARTJS__*/</script>
+<script>
+const DATA_B64="__DATA_B64__";
+"use strict";
+const PAL=['#4B2E1E','#B07A4F','#E2C3A3','#2E7D5B','#C0392B','#9A9A9A','#6B4F3A','#D9A441'];
+const BROWN='#4B2E1E',MID='#B07A4F',LIGHT='#E2C3A3';
+const MON=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const nf0=new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}),nf1=new Intl.NumberFormat('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1}),
+      nf2=new Intl.NumberFormat('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2});
+const rp=v=>'Rp '+nf0.format(Math.round(v));
+const rpS=v=>{const a=Math.abs(v);return a>=1e9?'Rp '+nf2.format(v/1e9)+' M':a>=1e6?'Rp '+nf2.format(v/1e6)+' Jt':rp(v)};
+const axS=v=>{const a=Math.abs(v);return a>=1e9?nf1.format(v/1e9)+' M':a>=1e6?nf0.format(v/1e6)+' Jt':a>=1e3?nf0.format(v/1e3)+' Rb':nf0.format(v)};
+const pc=v=>nf1.format(v*100)+'%';
+const div=(a,b)=>b?a/b:null;
+let D,N,C={};
+const A={};            // kolom baris order turunan
+const FILT={year:new Set(),channel:new Set(),category:new Set(),province:new Set(),segment:new Set(),pay:new Set(),status:new Set(),band:new Set(),product:new Set(),gender:new Set(),age:new Set(),acq:new Set()};
+const LABEL={year:'Tahun',channel:'Channel',category:'Kategori',province:'Provinsi',segment:'Segmen RFM',pay:'Pembayaran',status:'Status',band:'Diskon',product:'Produk',gender:'Gender',age:'Usia',acq:'Channel akuisisi'};
+const NAMES=()=>({year:['2024','2025'],channel:D.dims.channels,category:D.dims.categories,province:D.dims.provinces,segment:D.dims.segments,pay:D.dims.pays,status:D.dims.statuses,
+  band:D.dims.bands.map(b=>b+'%'),product:D.dims.products.map(p=>p[1]),gender:D.dims.genders,age:D.dims.ages,acq:D.dims.acqs});
+let NM;
+const ROWDIM=['year','channel','category','province','segment','pay','status','band','product','gender','age','acq'];
+const charts={};
+let page=0,rafId=0;
+
+/* ---------- data ---------- */
+async function load(){
+  if(typeof DecompressionStream==='undefined'){document.getElementById('msg').textContent='Browser tidak mendukung DecompressionStream. Gunakan Chrome, Edge, Firefox, atau Safari versi terbaru.';return}
+  const bin=atob(DATA_B64),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+  const txt=await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+  D=JSON.parse(txt);N=D.ord.ym.length;NM=NAMES();
+  const O=D.ord,P=D.dims.products;
+  A.year=Uint8Array.from(O.ym,v=>v>=12?1:0);A.channel=Uint8Array.from(O.ch);A.province=Uint8Array.from(O.prov);A.pay=Uint8Array.from(O.pay);A.status=Uint8Array.from(O.st);
+  A.band=Uint8Array.from(O.band);A.product=Uint8Array.from(O.prod);
+  A.category=Uint8Array.from(O.prod,p=>P[p][2]);A.segment=Uint8Array.from(O.cust,c=>D.cust.seg[c]);A.gender=Uint8Array.from(O.cust,c=>D.cust.gen[c]);
+  A.age=Uint8Array.from(O.cust,c=>D.cust.age[c]);A.acq=Uint8Array.from(O.cust,c=>D.cust.acq[c]);
+  A.sign=Int8Array.from(O.cust,c=>D.cust.sign[c]);
+  Chart.defaults.font.family='"Segoe UI",system-ui,sans-serif';Chart.defaults.font.size=11;Chart.defaults.color='#555';
+  Chart.defaults.animation=false;Chart.defaults.plugins.legend.labels.boxWidth=10;
+  initUI();update();
+}
+
+/* ---------- filter ---------- */
+function allow(excl){const L=[];for(const d of ROWDIM){if(d===excl||!FILT[d].size)continue;const m=new Uint8Array(64);FILT[d].forEach(v=>m[v]=1);L.push([A[d],m])}return L}
+function select(excl){const L=allow(excl),out=[];for(let i=0;i<N;i++){let ok=true;for(let k=0;k<L.length;k++){if(!L[k][1][L[k][0][i]]){ok=false;break}}if(ok)out.push(i)}return out}
+function msr(I){
+  const O=D.ord;let rev=0,prof=0,orders=0,units=0,disc=0,gross=0,rs=0,rc=0,ret=0,can=0;const cc=new Map();
+  for(const i of I){const st=O.st[i];
+    if(st===0){orders++;rev+=O.rev[i];prof+=O.prof[i];units+=O.qty[i];disc+=O.disc[i];gross+=O.gross[i];if(O.rating[i]){rs+=O.rating[i];rc++}cc.set(O.cust[i],(cc.get(O.cust[i])||0)+1)}
+    else if(st===1)ret++;else can++;}
+  let rep=0;cc.forEach(v=>{if(v>=2)rep++});const buyers=cc.size;
+  return {rev,prof,margin:div(prof,rev),orders,units,aov:div(rev,orders),avgq:div(units,orders),disc,discp:div(disc,gross),rating:div(rs,rc),
+    ret:div(ret,I.length),can:div(can,I.length),lines:I.length,buyers,rep,repRate:div(rep,buyers),rpb:div(rev,buyers)};
+}
+/* pemasaran + pelanggan baru */
+function yearRange(){const y=FILT.year;const a=y.size&&!y.has(0)?12:0,b=y.size&&!y.has(1)?11:23;return [a,b]}
+function mktSel(excl){const M=D.mkt,out=[];const ya=FILT.year,ac=excl==='acq'?null:FILT.acq;
+  for(let i=0;i<M.ym.length;i++){if(ya.size&&!ya.has(M.ym[i]>=12?1:0))continue;if(ac&&ac.size&&!ac.has(M.acq[i]))continue;out.push(i)}return out}
+function spendOf(sel,by){const r={};sel.forEach(i=>{const k=by==='acq'?D.mkt.acq[i]:D.mkt.ym[i];r[k]=(r[k]||0)+D.mkt.spend[i]});return r}
+function newCust(excl,by){ // pelanggan baru dalam rentang tanggal terpilih, hormati filter dimensi pelanggan
+  const [a,b]=yearRange(),Cu=D.cust,res={};const fs=FILT.segment,fg=FILT.gender,fa=FILT.age,fc=excl==='acq'?FILT.acq:FILT.acq;
+  for(let c=0;c<Cu.seg.length;c++){const s=Cu.sign[c];if(s<a||s>b)continue;
+    if(fs.size&&!fs.has(Cu.seg[c]))continue;if(fg.size&&!fg.has(Cu.gen[c]))continue;if(fa.size&&!fa.has(Cu.age[c]))continue;
+    if(excl!=='acq'&&fc.size&&!fc.has(Cu.acq[c]))continue;
+    const k=by==='acq'?Cu.acq[c]:by==='ym'?s:0;res[k]=(res[k]||0)+1}
+  return res}
+function cohortRev(I,by){const O=D.ord,r={};for(const i of I){if(O.st[i]!==0||A.sign[i]<0)continue;const k=by==='acq'?A.acq[i]:0;r[k]=(r[k]||0)+O.rev[i]}return r}
+const sum=o=>Object.values(o).reduce((a,b)=>a+b,0);
+
+/* ---------- UI ---------- */
+const PAGES=[
+ {t:'Overview',sub:'Business Monitor',sl:['year','channel','category','province','segment'],cols:7},
+ {t:'Produk & Diskon',sub:'Produk & Diskon',sl:['year','channel','category','province','segment'],cols:6},
+ {t:'Pelanggan & Marketing',sub:'Pelanggan & Marketing',sl:['year','acq','segment','gender','age'],cols:6}];
+function initUI(){
+  const nav=document.getElementById('nav');
+  PAGES.forEach((p,i)=>{const b=document.createElement('button');b.textContent=p.t;b.onclick=()=>{page=i;buildPage();update()};nav.appendChild(b)});
+  document.addEventListener('click',e=>{if(!e.target.closest('.slc'))document.querySelectorAll('.slc.open').forEach(x=>x.classList.remove('open'))});
+  buildPage();
+}
+function buildPage(){
+  const P=PAGES[page];document.getElementById('sub').textContent=P.sub;
+  [...document.getElementById('nav').children].forEach((b,i)=>b.classList.toggle('on',i===page));
+  const sl=document.getElementById('slicers');sl.innerHTML='';
+  P.sl.forEach(d=>{const w=document.createElement('div');w.className='slc';w.dataset.dim=d;
+    w.innerHTML=`<label>${LABEL[d]}</label><div class="btn"><span></span></div><div class="pnl"></div>`;
+    w.querySelector('.btn').onclick=e=>{e.stopPropagation();const o=w.classList.contains('open');document.querySelectorAll('.slc.open').forEach(x=>x.classList.remove('open'));if(!o)w.classList.add('open')};
+    const pn=w.querySelector('.pnl');NM[d].forEach((n,i)=>{const it=document.createElement('div');it.dataset.v=i;it.innerHTML='<i></i>'+n;it.onclick=e=>{e.stopPropagation();toggle(d,i)};pn.appendChild(it)});
+    sl.appendChild(w)});
+  Object.values(charts).forEach(c=>c.destroy());for(const k in charts)delete charts[k];
+  const k=document.getElementById('kpis');k.style.gridTemplateColumns=`repeat(${P.cols},1fr)`;
+  document.getElementById('page').innerHTML=PAGE_HTML[page];
+  PAGE_INIT[page]();
+}
+function toggle(d,i){const s=FILT[d];s.has(i)?s.delete(i):s.add(i);update()}
+function reset(){for(const d in FILT)FILT[d].clear();update()}
+function chips(){
+  const box=document.getElementById('chips');box.innerHTML='';let any=false;
+  for(const d in FILT)FILT[d].forEach(v=>{any=true;const c=document.createElement('span');c.className='chip';c.innerHTML=`${LABEL[d]}: ${NM[d][v]} <b title="Hapus">×</b>`;c.querySelector('b').onclick=()=>toggle(d,v);box.appendChild(c)});
+  if(any){const r=document.createElement('button');r.className='reset';r.textContent='Reset semua filter';r.onclick=reset;box.appendChild(r)}
+}
+function syncSlicers(){
+  document.querySelectorAll('.slc').forEach(w=>{const d=w.dataset.dim,s=FILT[d];
+    w.querySelector('.btn span').textContent=!s.size?'Semua':s.size===1?NM[d][[...s][0]]:s.size+' dipilih';
+    w.querySelectorAll('.pnl div').forEach(it=>it.classList.toggle('sel',s.has(+it.dataset.v)))})
+}
+function setKpis(items){
+  const k=document.getElementById('kpis');k.innerHTML='';
+  items.forEach(([v,l])=>{const d=document.createElement('div');d.className='kpi';d.innerHTML=`<div class="v">${v}</div><div class="l">${l}</div>`;k.appendChild(d)})
+}
+const dash=v=>v==null||!isFinite(v)?'—':v;
+
+/* ---------- helper grafik ---------- */
+function mk(id,cfg){charts[id]=new Chart(document.getElementById(id),cfg);return charts[id]}
+function hl(dim,ids){const s=FILT[dim];return ids.map((id,i)=>!s.size||s.has(id)?null:'dim')}
+function colors(dim,ids,base,pal){const s=FILT[dim];return ids.map((id,i)=>{const c=pal?PAL[i%PAL.length]:base;return !s.size||s.has(id)?c:c+'55'})}
+function baseOpts(extra){return Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{}}},extra||{})}
+function barCfg(horizontal,fmtTip,dim,click){
+  return {type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:1,maxBarThickness:28}]},
+    options:baseOpts({indexAxis:horizontal?'y':'x',
+      scales:horizontal?{x:{grid:{color:'#EEE7E0'},ticks:{callback:axS}},y:{grid:{display:false},ticks:{autoSkip:false}}}:{y:{grid:{color:'#EEE7E0'},beginAtZero:true,ticks:{callback:v=>fmtTip.axis?fmtTip.axis(v):axS(v)}},x:{grid:{display:false}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmtTip.tip(c.parsed[horizontal?'x':'y'])}}},
+      onClick:(e,els,ch)=>{if(els.length&&dim){toggle(dim,ch._ids[els[0].index])}},
+      onHover:(e,els)=>{e.native.target.style.cursor=els.length&&dim?'pointer':'default'}})}}
+function setBar(id,items,dim,fmt){ // items: [[id,label,value]]
+  const ch=charts[id];ch._ids=items.map(x=>x[0]);ch.data.labels=items.map(x=>x[1]);ch.data.datasets[0].data=items.map(x=>x[2]);
+  ch.data.datasets[0].backgroundColor=colors(dim,ch._ids,BROWN);ch.update()}
+function donutCfg(dim,tip){
+  return {type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderColor:'#fff',borderWidth:2}]},
+    options:baseOpts({cutout:'58%',plugins:{legend:{display:true,position:'right',labels:{boxWidth:10,font:{size:11}}},tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return ' '+c.label+': '+tip(c.parsed)+' ('+nf1.format(c.parsed/t*100)+'%)'}}}},
+      onClick:(e,els,ch)=>{if(els.length)toggle(dim,ch._ids[els[0].index])},onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'}})}}
+function setDonut(id,items,dim){const ch=charts[id];ch._ids=items.map(x=>x[0]);ch.data.labels=items.map(x=>x[1]);ch.data.datasets[0].data=items.map(x=>x[2]);
+  ch.data.datasets[0].backgroundColor=colors(dim,ch._ids,null,true);ch.update()}
+const card=(id,title,cls,body)=>`<div class="card ${cls||''}"><h3>${title}</h3>${body||`<div class="cv"><canvas id="${id}"></canvas></div>`}</div>`;
+
+/* ---------- halaman ---------- */
+const PAGE_HTML=[
+ `<div class="grid" style="grid-template-columns:560fr 340fr 308fr;height:260px">${card('c_line','Revenue bulanan (2024 vs 2025)')}${card('c_cat','Revenue per kategori')}${card('c_ch','Bauran channel')}</div>
+  <div class="grid" style="grid-template-columns:400fr 400fr 408fr;height:250px">${card('c_prov','Revenue per provinsi')}${card('c_pay','Metode pembayaran')}${card('c_st','Status order')}</div>`,
+ `<div class="grid" style="grid-template-columns:520fr 700fr;height:492px">
+    ${card('','Profit per produk','tall','<div class="scroll"><div style="position:relative;height:1000px"><canvas id="c_prod"></canvas></div></div>')}
+    <div style="display:grid;gap:12px;grid-template-rows:240px 240px;min-width:0;min-height:0">
+      <div class="grid" style="grid-template-columns:350fr 338fr;margin:0">${card('c_mband','Margin per level diskon')}${card('c_qband','Unit per order vs diskon')}</div>
+      ${card('','Ringkasan kategori','',`<div class="scroll"><table id="t_cat"></table></div>`)}
+    </div></div>`,
+ `<div class="grid" style="grid-template-columns:380fr 380fr 448fr;height:250px">${card('c_seg1','Pelanggan per segmen RFM')}${card('c_seg2','Kontribusi revenue per segmen')}${card('c_cac','CAC per channel akuisisi')}</div>
+  <div class="grid" style="grid-template-columns:700fr 520fr;height:250px">${card('c_mk','Spend vs pelanggan baru per bulan')}${card('','Efisiensi per channel','',`<div class="scroll"><table id="t_acq"></table></div>`)}</div>`];
+const PAGE_INIT=[
+ ()=>{
+  mk('c_line',{type:'line',data:{labels:MON,datasets:[]},options:baseOpts({plugins:{legend:{display:true,position:'top',align:'start',labels:{boxWidth:10}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+rp(c.parsed.y)}}},
+    scales:{y:{beginAtZero:true,grid:{color:'#EEE7E0'},ticks:{callback:axS}},x:{grid:{display:false}}},interaction:{mode:'index',intersect:false}})});
+  mk('c_cat',barCfg(true,{tip:rp},'category'));mk('c_ch',donutCfg('channel',rp));
+  mk('c_prov',barCfg(true,{tip:rp},'province'));mk('c_pay',barCfg(true,{tip:rp},'pay'));mk('c_st',donutCfg('status',v=>nf0.format(v)+' baris'));
+ },
+ ()=>{
+  mk('c_prod',barCfg(true,{tip:rp},'product'));
+  mk('c_mband',barCfg(false,{tip:pc,axis:v=>nf0.format(v*100)+'%'},'band'));mk('c_qband',barCfg(false,{tip:v=>nf2.format(v),axis:v=>nf1.format(v)},'band'));
+ },
+ ()=>{
+  mk('c_seg1',barCfg(true,{tip:v=>nf0.format(v)+' pelanggan',axis:v=>nf0.format(v)},'segment'));mk('c_seg2',barCfg(true,{tip:pc,axis:v=>nf0.format(v*100)+'%'},'segment'));
+  mk('c_cac',barCfg(false,{tip:rp},'acq'));
+  mk('c_mk',{type:'bar',data:{labels:[],datasets:[{label:'Spend',data:[],backgroundColor:BROWN,yAxisID:'y',order:2},{type:'line',label:'Pelanggan baru',data:[],borderColor:MID,backgroundColor:MID,yAxisID:'y1',tension:.2,pointRadius:3,order:1}]},
+    options:baseOpts({plugins:{legend:{display:true,position:'top',align:'start',labels:{boxWidth:10}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+(c.datasetIndex?nf0.format(c.parsed.y):rp(c.parsed.y))}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#EEE7E0'},ticks:{callback:axS}},y1:{position:'right',beginAtZero:true,grid:{display:false}},x:{grid:{display:false},ticks:{maxRotation:60,minRotation:45,font:{size:10}}}}})});
+ }];
+
+function update(){cancelAnimationFrame(rafId);rafId=requestAnimationFrame(render)}
+function render(){
+  syncSlicers();chips();
+  const Iall=select(null),m=msr(Iall),O=D.ord;
+  if(page===0){
+    const Iy=select('year');let r=[0,0];for(const i of Iy){if(O.st[i]===0)r[A.year[i]]+=O.rev[i]}
+    setKpis([[rpS(m.rev),'Revenue'],[r[0]?(r[1]/r[0]-1>=0?'+':'')+pc(r[1]/r[0]-1):'—','Growth 2025 vs 2024'],[rpS(m.prof),'Profit'],[m.margin==null?'—':pc(m.margin),'Margin'],[nf0.format(m.orders),'Order'],[rp(m.aov||0),'AOV'],[m.repRate==null?'—':pc(m.repRate),'Repeat rate']]);
+    // garis
+    const ys=FILT.year.size?[...FILT.year]:[0,1],ds=[];
+    ys.sort().forEach(y=>{const a=new Array(12).fill(0);for(const i of Iall){if(O.st[i]===0&&A.year[i]===y)a[O.ym[i]%12]+=O.rev[i]}
+      ds.push({label:String(2024+y),data:a,borderColor:y?BROWN:MID,backgroundColor:y?BROWN:MID,borderWidth:y?3:2.5,pointRadius:3,tension:0})});
+    charts.c_line.data.datasets=ds;charts.c_line.update();
+    const grp=(dim,names,excl,sortDesc=true)=>{const I=select(excl),a=new Array(names.length).fill(0);for(const i of I){if(O.st[i]===0)a[A[dim][i]]+=O.rev[i]}
+      let it=names.map((n,k)=>[k,n,a[k]]).filter(x=>x[2]>0);if(sortDesc)it.sort((p,q)=>q[2]-p[2]);return it};
+    setBar('c_cat',grp('category',NM.category,'category'),'category');
+    setDonut('c_ch',grp('channel',NM.channel,'channel'),'channel');
+    setBar('c_prov',grp('province',NM.province,'province'),'province');
+    setBar('c_pay',grp('pay',NM.pay,'pay'),'pay');
+    {const I=select('status'),a=[0,0,0];I.forEach(i=>a[O.st[i]]++);setDonut('c_st',NM.status.map((n,k)=>[k,n,a[k]]).filter(x=>x[2]>0),'status')}
+  }
+  if(page===1){
+    setKpis([[nf0.format(m.units),'Unit terjual'],[rpS(m.disc),'Biaya diskon'],[m.discp==null?'—':pc(m.discp),'Diskon efektif'],[m.rating==null?'—':nf2.format(m.rating),'Rating'],[m.ret==null?'—':pc(m.ret),'Return rate'],[m.can==null?'—':pc(m.can),'Cancel rate']]);
+    {const I=select('product'),a=new Array(D.dims.products.length).fill(0);for(const i of I){if(O.st[i]===0)a[O.prod[i]]+=O.prof[i]}
+     const it=D.dims.products.map((p,k)=>[k,p[1],a[k]]).filter(x=>x[2]!==0).sort((p,q)=>q[2]-p[2]);charts.c_prod.canvas.parentElement.style.height=Math.max(260,it.length*19+30)+'px';setBar('c_prod',it,'product')}
+    {const I=select('band'),R=new Array(6).fill(0),P=new Array(6).fill(0),Q=new Array(6).fill(0),Nn=new Array(6).fill(0);
+     for(const i of I){if(O.st[i]===0){const b=O.band[i];R[b]+=O.rev[i];P[b]+=O.prof[i];Q[b]+=O.qty[i];Nn[b]++}}
+     const ids=[0,1,2,3,4,5].filter(b=>Nn[b]>0),lab=b=>NM.band[b];
+     setBar('c_mband',ids.map(b=>[b,lab(b),R[b]?P[b]/R[b]:0]),'band');setBar('c_qband',ids.map(b=>[b,lab(b),Q[b]/Nn[b]]),'band')}
+    {const I=select('category'),n=NM.category.length,R=new Array(n).fill(0),P=new Array(n).fill(0),U=new Array(n).fill(0),Dc=new Array(n).fill(0),G=new Array(n).fill(0);
+     for(const i of I){if(O.st[i]===0){const c=A.category[i];R[c]+=O.rev[i];P[c]+=O.prof[i];U[c]+=O.qty[i];Dc[c]+=O.disc[i];G[c]+=O.gross[i]}}
+     const rows=NM.category.map((nme,k)=>[k,nme,R[k],P[k],R[k]?P[k]/R[k]:0,U[k],G[k]?Dc[k]/G[k]:0]).filter(r=>r[2]>0).sort((a,b)=>a[1].localeCompare(b[1]));
+     const T=rows.reduce((a,r)=>[a[0]+r[2],a[1]+r[3],a[2]+r[5]],[0,0,0]),sd=FILT.category;
+     const sumD=Dc.reduce((a,b)=>a+b,0),sumG=G.reduce((a,b)=>a+b,0);
+     document.getElementById('t_cat').innerHTML=`<thead><tr><th>Kategori</th><th>Revenue</th><th>Profit</th><th>Margin %</th><th>Unit</th><th>Diskon %</th></tr></thead><tbody>`+
+       rows.map(r=>`<tr class="row ${sd.has(r[0])?'on':sd.size?'dim':''}" data-k="${r[0]}"><td>${r[1]}</td><td>${rp(r[2])}</td><td>${rp(r[3])}</td><td>${pc(r[4])}</td><td>${nf0.format(r[5])}</td><td>${pc(r[6])}</td></tr>`).join('')+
+       `</tbody><tfoot><tr><td>Total</td><td>${rp(T[0])}</td><td>${rp(T[1])}</td><td>${pc(T[0]?T[1]/T[0]:0)}</td><td>${nf0.format(T[2])}</td><td>${pc(sumG?sumD/sumG:0)}</td></tr></tfoot>`;
+     document.querySelectorAll('#t_cat tr.row').forEach(tr=>tr.onclick=()=>toggle('category',+tr.dataset.k))}
+  }
+  if(page===2){
+    const mk_=mktSel(null),spend=sum(spendOf(mk_,'acq')),nc=newCust(null,'all'),ncT=sum(nc),coh=sum(cohortRev(Iall,'all'));
+    setKpis([[nf0.format(m.buyers),'Pelanggan aktif'],[nf0.format(ncT),'Pelanggan baru'],[rpS(spend),'Marketing spend'],[ncT?rp(spend/ncT):'—','CAC'],[spend?nf2.format(coh/spend)+'x':'—','ROAS'],[rp(m.rpb||0),'Revenue/pelanggan']]);
+    {const I=select('segment'),S=NM.segment.length,B=Array.from({length:S},()=>new Map()),R=new Array(S).fill(0);
+     for(const i of I){if(O.st[i]===0){const s=A.segment[i];B[s].set(O.cust[i],1);R[s]+=O.rev[i]}}
+     const tot=R.reduce((a,b)=>a+b,0);
+     setBar('c_seg1',NM.segment.map((n,k)=>[k,n,B[k].size]).filter(x=>x[2]>0).sort((p,q)=>q[2]-p[2]),'segment');
+     setBar('c_seg2',NM.segment.map((n,k)=>[k,n,tot?R[k]/tot:0]).filter(x=>x[2]>0).sort((p,q)=>q[2]-p[2]),'segment')}
+    {const I=select('acq'),Sp=spendOf(mktSel('acq'),'acq'),Nc=newCust('acq','acq'),Co=cohortRev(I,'acq'),Rv={},By={};
+     for(const i of I){if(O.st[i]===0){Rv[A.acq[i]]=(Rv[A.acq[i]]||0)+O.rev[i];(By[A.acq[i]]=By[A.acq[i]]||new Set()).add(O.cust[i])}}
+     const cac=NM.acq.map((n,k)=>[k,n,Sp[k]?Sp[k]/(Nc[k]||0):null]).filter(x=>x[2]!=null&&isFinite(x[2])).sort((a,b)=>a[2]-b[2]);
+     setBar('c_cac',cac,'acq');
+     const sd=FILT.acq,ts=sum(Sp),tn=sum(Nc);
+     document.getElementById('t_acq').innerHTML=`<thead><tr><th>Channel</th><th>Spend</th><th>Pelanggan baru</th><th>CAC</th><th>ROAS</th></tr></thead><tbody>`+
+       NM.acq.map((n,k)=>`<tr class="row ${sd.has(k)?'on':sd.size?'dim':''}" data-k="${k}"><td>${n}</td><td>${Sp[k]?rp(Sp[k]):''}</td><td>${nf0.format(Nc[k]||0)}</td><td>${Sp[k]&&Nc[k]?rp(Sp[k]/Nc[k]):''}</td><td>${Sp[k]?nf2.format((Co[k]||0)/Sp[k])+'x':''}</td></tr>`).join('')+
+       `</tbody><tfoot><tr><td>Total</td><td>${rp(ts)}</td><td>${nf0.format(tn)}</td><td>${tn?rp(ts/tn):''}</td><td>${ts?nf2.format(sum(Co)/ts)+'x':''}</td></tr></tfoot>`;
+     document.querySelectorAll('#t_acq tr.row').forEach(tr=>tr.onclick=()=>toggle('acq',+tr.dataset.k))}
+    {const [a,b]=yearRange(),Sp=spendOf(mktSel(null),'ym'),Nc=newCust(null,'ym'),mo=[];for(let k=a;k<=b;k++)mo.push(k);
+     charts.c_mk.data.labels=mo.map(k=>D.dims.months[k]);charts.c_mk.data.datasets[0].data=mo.map(k=>Sp[k]||0);charts.c_mk.data.datasets[1].data=mo.map(k=>Nc[k]||0);charts.c_mk.update()}
+  }
+}
+load();
+</script>
+</body>
+</html>
